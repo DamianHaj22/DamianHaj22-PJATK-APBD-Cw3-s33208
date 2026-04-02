@@ -260,7 +260,12 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie14_SredniaOcenaNaPrzedmiot()
     {
-        throw Niezaimplementowano(nameof(Zadanie14_SredniaOcenaNaPrzedmiot));
+        return DaneUczelni.Prowadzacy
+            .GroupJoin(DaneUczelni.Przedmioty,
+                prowadzacy => prowadzacy.Id,
+                przedmioty => przedmioty.ProwadzacyId,
+                ((prowadzacy, przedmiotyGrupa) =>
+                    $"{prowadzacy.Imie} {prowadzacy.Nazwisko}: {przedmiotyGrupa.Count()} przedmiot/y"));
     }
 
     /// <summary>
