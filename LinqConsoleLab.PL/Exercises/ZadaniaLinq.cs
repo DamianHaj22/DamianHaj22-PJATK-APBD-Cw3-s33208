@@ -1,3 +1,4 @@
+using System.Data.Common;
 using LinqConsoleLab.PL.Data;
 
 namespace LinqConsoleLab.PL.Exercises;
@@ -236,7 +237,13 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie13_GrupowanieZapisowWedlugPrzedmiotu()
     {
-        throw Niezaimplementowano(nameof(Zadanie13_GrupowanieZapisowWedlugPrzedmiotu));
+        return DaneUczelni.Zapisy
+            .Join(DaneUczelni.Przedmioty,
+                zapis => zapis.PrzedmiotId,
+                przedmiot => przedmiot.Id,
+                (zapis, przedmiot) => przedmiot.Nazwa)
+            .GroupBy(nazwaPrzedmiotu => nazwaPrzedmiotu)
+            .Select(grupa => $"{grupa.Key}: {grupa.Count()} zapisów");
     }
 
     /// <summary>
