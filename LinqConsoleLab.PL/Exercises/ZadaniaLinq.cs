@@ -260,12 +260,14 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie14_SredniaOcenaNaPrzedmiot()
     {
-        return DaneUczelni.Prowadzacy
-            .GroupJoin(DaneUczelni.Przedmioty,
-                prowadzacy => prowadzacy.Id,
-                przedmioty => przedmioty.ProwadzacyId,
-                ((prowadzacy, przedmiotyGrupa) =>
-                    $"{prowadzacy.Imie} {prowadzacy.Nazwisko}: {przedmiotyGrupa.Count()} przedmiot/y"));
+        return DaneUczelni.Zapisy
+            .Where(zapis => zapis.OcenaKoncowa.HasValue)
+            .Join(DaneUczelni.Przedmioty,
+                zapis => zapis.PrzedmiotId,
+                przedmiot => przedmiot.Id,
+                (zapis, przedmiot) => new { przedmiot.Nazwa, zapis.OcenaKoncowa })
+            .GroupBy(temp => temp.Nazwa)
+            .Select(grupa => $"{grupa.Key}: średnia {grupa.Average(x => x.OcenaKoncowa):F2}");
     }
 
     /// <summary>
@@ -281,7 +283,12 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie15_ProwadzacyILiczbaPrzedmiotow()
     {
-        throw Niezaimplementowano(nameof(Zadanie15_ProwadzacyILiczbaPrzedmiotow));
+        return DaneUczelni.Prowadzacy
+        .GroupJoin(DaneUczelni.Przedmioty,
+            prowadzacy => prowadzacy.Id,
+            przedmioty => przedmioty.ProwadzacyId,
+            ((prowadzacy, przedmiotyGrupa) =>
+                $"{prowadzacy.Imie} {prowadzacy.Nazwisko}: {przedmiotyGrupa.Count()} przedmiot/y"));
     }
 
     /// <summary>
