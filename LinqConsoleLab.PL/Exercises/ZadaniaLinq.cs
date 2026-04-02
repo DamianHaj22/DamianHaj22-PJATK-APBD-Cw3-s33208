@@ -213,7 +213,15 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie12_ParyStudentPrzedmiot()
     {
-        throw Niezaimplementowano(nameof(Zadanie12_ParyStudentPrzedmiot));
+        return DaneUczelni.Zapisy
+            .Join(DaneUczelni.Studenci, 
+                zapis => zapis.StudentId, 
+                student => student.Id, 
+                (zapis, student) => new { zapis.PrzedmiotId, student.Imie, student.Nazwisko })
+            .Join(DaneUczelni.Przedmioty, 
+                temp => temp.PrzedmiotId, 
+                przedmiot => przedmiot.Id, 
+                (temp, przedmiot) => $"{temp.Imie} {temp.Nazwisko} - {przedmiot.Nazwa}");
     }
 
     /// <summary>
