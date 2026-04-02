@@ -383,15 +383,27 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie03_ProwadzacyISredniaOcenNaIchPrzedmiotach()
     {
-        return DaneUczelni.Przedmioty
-            .Where(p => p.DataStartu.Month == 4 && p.DataStartu.Year == 2026)
-            .GroupJoin(DaneUczelni.Zapisy, 
-                p => p.Id,
-                z => z.PrzedmiotId,
-                (p, zapisyGrupa) => new { p.Nazwa, Zapisy = zapisyGrupa })
-            .Where(temp => temp.Zapisy.All(z => z.OcenaKoncowa == null))
-            .Select(res => $"{res.Nazwa} (Start: kwiecień 2026)");
-                
+        return DaneUczelni.Prowadzacy
+            .GroupJoin(DaneUczelni.Przedmioty,
+                prow => prow.Id,
+                przed => przed.ProwadzacyId,
+                (prow, przedmioty) => new 
+                { 
+                    Prowadzacy = $"{prow.Imie} {prow.Nazwisko}",
+                    PrzedmiotyIds = przedmioty.Select(p => p.Id) 
+                })
+            .Select(temp => new
+            {
+                temp.Prowadzacy,
+                Srednia = DaneUczelni.Zapisy
+                    .Where(z => temp.PrzedmiotyIds.Contains(z.PrzedmiotId) && z.OcenaKoncowa.HasValue)
+                    .Select(z => z.OcenaKoncowa.Value)
+                    .DefaultIfEmpty()
+                    .Average()
+            })
+            .Select(res => res.Srednia > 0 
+                ? $"{res.Prowadzacy}: Średnia ocen {res.Srednia:F2}" 
+                : $"{res.Prowadzacy}: Brak wystawionych ocen");
     }
 
     /// <summary>
@@ -409,7 +421,15 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie04_MiastaILiczbaAktywnychZapisow()
     {
-        throw Niezaimplementowano(nameof(Wyzwanie04_MiastaILiczbaAktywnychZapisow));
+        return DaneUczelni.Studenci
+            .Join(DaneUczelni.Zapisy.Where(z => z.CzyAktywny),
+                student => student.Id,
+                zapis => zapis.StudentId,
+                (student, zapis) => student.Miasto)
+            .GroupBy(miasto => miasto)
+            .Select(g => new { Miasto = g.Key, Liczba = g.Count() })
+            .OrderByDescending(x => x.Liczba)
+            .Select(res => $"{res.Miasto}: {res.Liczba} aktywnych zapisów");
     }
 
     private static NotImplementedException Niezaimplementowano(string nazwaMetody)
