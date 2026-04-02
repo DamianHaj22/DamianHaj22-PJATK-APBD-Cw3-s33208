@@ -192,7 +192,12 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie11_PolaczStudentowIZapisy()
     {
-        throw Niezaimplementowano(nameof(Zadanie11_PolaczStudentowIZapisy));
+        return DaneUczelni.Studenci.Join(
+            DaneUczelni.Zapisy,
+            student => student.Id,
+            zapis => zapis.StudentId,
+            ((student, zapis) => $"{student.Imie} {student.Nazwisko} - Data zapisu {zapis.DataZapisu:yyyy-MM-dd}")
+        );
     }
 
     /// <summary>
