@@ -305,7 +305,15 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Zadanie16_NajwyzszaOcenaKazdegoStudenta()
     {
-        throw Niezaimplementowano(nameof(Zadanie16_NajwyzszaOcenaKazdegoStudenta));
+        return DaneUczelni.Zapisy
+            .Where(zapis => zapis.OcenaKoncowa.HasValue)
+            .Join(DaneUczelni.Studenci,
+                zapis => zapis.StudentId,
+                student => student.Id,
+                (zapis, student) => new { student.Imie, student.Nazwisko, zapis.OcenaKoncowa })
+            .GroupBy(temp => new { temp.Imie, temp.Nazwisko })
+            .Select(grupa =>
+                $"{grupa.Key.Imie} {grupa.Key.Nazwisko}: Najwyższa ocena {grupa.Max(x => x.OcenaKoncowa)}");
     }
 
     /// <summary>
@@ -323,7 +331,17 @@ public sealed class ZadaniaLinq
     /// </summary>
     public IEnumerable<string> Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem()
     {
-        throw Niezaimplementowano(nameof(Wyzwanie01_StudenciZWiecejNizJednymAktywnymPrzedmiotem));
+        return DaneUczelni.Zapisy
+            .Where(zapis => zapis.CzyAktywny)
+            .Join(DaneUczelni.Studenci,
+                zapis => zapis.StudentId,
+                student => student.Id,
+                (zapis, student) => new { student.Imie, student.Nazwisko })
+            .GroupBy(s => new { s.Imie, s.Nazwisko })
+            .Select(g => new { g.Key.Imie, g.Key.Nazwisko, Liczba = g.Count() })
+            .Where(x => x.Liczba > 1)
+            .Select(res => $"{res.Imie} {res.Nazwisko}: {res.Liczba} aktywne przedmioty");
+
     }
 
     /// <summary>
